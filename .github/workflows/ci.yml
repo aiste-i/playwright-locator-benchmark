@@ -1,0 +1,163 @@
+name: CI - Locator Robustness Tests
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.19.0'
+          cache: 'npm'
+          cache-dependency-path: |
+            package-lock.json
+            apps/react/package-lock.json
+            apps/angular-realworld-example-app/package-lock.json
+
+      - name: Install root dependencies
+        run: npm ci
+
+      - name: Install React TodoMVC dependencies
+        run: |
+          cd apps/react
+          npm ci
+
+      - name: Build React TodoMVC app
+        run: |
+          cd apps/react
+          npm run build
+
+      - name: Install Angular RealWorld dependencies
+        run: |
+          cd apps/angular-realworld-example-app
+          npm ci
+        env:
+          HUSKY: 0
+
+      - name: Start React TodoMVC app (port 7002)
+        run: |
+          cd apps/react
+          nohup npm run serve > /tmp/react-app.log 2>&1 &
+          echo $! > /tmp/react-app.pid
+        env:
+          PORT: 7002
+
+      - name: Start Angular RealWorld app (port 4200)
+        run: |
+          cd apps/angular-realworld-example-app
+          nohup npx ng serve --port 4200 --host 0.0.0.0 > /tmp/angular-app.log 2>&1 &
+          echo $! > /tmp/angular-app.pid
+        env:
+          PORT: 4200
+
+      - name: Wait for apps to be ready
+        run: |
+          echo "Waiting for apps to start..."
+          timeout=300
+          elapsed=0
+          while [ $elapsed -lt $timeout ]; do
+            react_status=0
+            angular_status=0
+            curl -f http://localhost:7002 > /dev/null 2>&1 && react_status=1 || true
+            curl -f http://localhost:4200 > /dev/null 2>&1 && angular_status=1 || true
+            
+            if [ $react_status -eq 1 ] && [ $angular_status -eq 1 ]; then
+              echo "Both apps are ready!"
+              curl -s http://localhost:7002 | head -20
+              curl -s http://localhost:4200 | head -20
+              exit 0
+            fi
+            echo "Waiting for apps... React: $react_status, Angular: $angular_status ($elapsed/$timeout seconds)"
+            sleep 3
+            elapsed=$((elapsed + 3))
+          done
+          echo "Apps failed to start within timeout"
+          echo "React app log:"
+          cat /tmp/react-app.log || true
+          echo "Angular app log:"
+          cat /tmp/angular-app.log || true
+          exit 1
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium firefox webkit
+
+      - name: Run test scenarios
+        run: npm run scenarios
+        continue-on-error: true
+        env:
+          CI: true
+          TODOMVC_URL: http://localhost:7002/
+          REALWORLD_URL: http://localhost:4200/
+
+      - name: Run analysis scripts
+        run: |
+          npm run analyze
+          npm run analyze:enhanced
+        continue-on-error: true
+
+      - name: Create results summary
+        if: always()
+        run: |
+          echo "# Test Results Summary" > results-summary.md
+          echo "" >> results-summary.md
+          echo "## Test Run Information" >> results-summary.md
+          echo "- Run Date: $(date -u +"%Y-%m-%d %H:%M:%S UTC")" >> results-summary.md
+          echo "- Workflow: ${{ github.workflow }}" >> results-summary.md
+          echo "- Run ID: ${{ github.run_id }}" >> results-summary.md
+          echo "- Commit: ${{ github.sha }}" >> results-summary.md
+          echo "" >> results-summary.md
+          if [ -d "datasets" ]; then
+            echo "## Generated Files" >> results-summary.md
+            echo "\`\`\`" >> results-summary.md
+            ls -lh datasets/ >> results-summary.md || true
+            echo "\`\`\`" >> results-summary.md
+            if [ -d "datasets/summary" ]; then
+              echo "" >> results-summary.md
+              echo "## Analysis Results" >> results-summary.md
+              echo "\`\`\`" >> results-summary.md
+              ls -lh datasets/summary/ >> results-summary.md || true
+              echo "\`\`\`" >> results-summary.md
+            fi
+          fi
+
+      - name: Upload test results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-results
+          path: |
+            datasets/
+            playwright-report/
+            results-summary.md
+          retention-days: 30
+
+      - name: Upload analysis results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: analysis-results
+          path: |
+            datasets/summary/
+          retention-days: 30
+
+      - name: Cleanup apps
+        if: always()
+        run: |
+          if [ -f /tmp/react-app.pid ]; then
+            kill $(cat /tmp/react-app.pid) 2>/dev/null || true
+          fi
+          if [ -f /tmp/angular-app.pid ]; then
+            kill $(cat /tmp/angular-app.pid) 2>/dev/null || true
+          fi

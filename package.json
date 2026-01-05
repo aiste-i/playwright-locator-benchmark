@@ -1,0 +1,25 @@
+{
+  "name": "tests",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "test": "npx playwright test",
+    "analyze": "node scripts/analyze.js",
+    "analyze:enhanced": "node scripts/analyze-enhanced.js",
+    "scenarios": "bash scripts/run-scenarios.sh",
+    "scenarios:skip-baseline": "bash scripts/run-scenarios.sh --skip-baseline"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "devDependencies": {
+    "@playwright/test": "^1.55.1",
+    "prettier": "^3.7.4",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.3"
+  }
+}

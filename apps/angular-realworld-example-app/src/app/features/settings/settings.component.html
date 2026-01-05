@@ -1,0 +1,61 @@
+<div class="settings-page">
+  <div class="container page">
+    <div class="row">
+      <div class="col-md-6 offset-md-3 col-xs-12">
+        <h1 class="text-xs-center">Your Settings</h1>
+
+        <app-list-errors [errors]="errors" />
+
+        <form [formGroup]="settingsForm" (ngSubmit)="submitForm()" data-testid="settings-form">
+          <fieldset [disabled]="isSubmitting">
+            <fieldset class="form-group">
+              <input class="form-control" type="text" placeholder="URL of profile picture" formControlName="image" data-testid="settings-image" />
+            </fieldset>
+
+            <fieldset class="form-group">
+              <input
+                class="form-control form-control-lg"
+                type="text"
+                placeholder="Username"
+                formControlName="username"
+                data-testid="settings-username"
+              />
+            </fieldset>
+
+            <fieldset class="form-group">
+              <textarea
+                class="form-control form-control-lg"
+                rows="8"
+                placeholder="Short bio about you"
+                formControlName="bio"
+                data-testid="settings-bio"
+              >
+              </textarea>
+            </fieldset>
+
+            <fieldset class="form-group">
+              <input class="form-control form-control-lg" type="email" placeholder="Email" formControlName="email" data-testid="settings-email" />
+            </fieldset>
+
+            <fieldset class="form-group">
+              <input
+                class="form-control form-control-lg"
+                type="password"
+                placeholder="New Password"
+                formControlName="password"
+                data-testid="settings-password"
+              />
+            </fieldset>
+
+            <button class="btn btn-lg btn-primary pull-xs-right" type="submit" data-testid="settings-submit">Update Settings</button>
+          </fieldset>
+        </form>
+
+        <!-- Line break for logout button -->
+        <hr />
+
+        <button class="btn btn-outline-danger" (click)="logout()" data-testid="settings-logout">Or click here to logout.</button>
+      </div>
+    </div>
+  </div>
+</div>
