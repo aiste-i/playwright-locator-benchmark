@@ -57,11 +57,10 @@ const REALWORLD_STRATEGIES = {
 
   previewLinkBySlug: {
     getByRole: (page: Page, slug: string) =>
-        page
-        .locator(`app-article-preview:has(a.preview-link[href="/article/${slug}"])`)
+      page
+        .locator(`app-article-preview:has(a[href="/article/${slug}"])`)
         .getByRole('link')
-        .filter({ has: page.locator('h1') })   
-        .first(),
+        .filter({ has: page.locator('h1') }),
     getByTestId: (page: Page, slug: string) =>
       page.getByTestId(`article-link-${slug}`),
     css: (page: Page, slug: string) =>
@@ -73,9 +72,8 @@ const REALWORLD_STRATEGIES = {
   favoriteButtonBySlug: {
     getByRole: (page: Page, slug: string) =>
       page
-        .locator(`app-article-preview:has(a.preview-link[href="/article/${slug}"])`)
-        .getByRole('button')
-        .first(), 
+        .locator(`app-article-preview:has(a[href="/article/${slug}"])`)
+        .getByRole('button'),
     getByTestId: (page: Page, slug: string) =>
       page.getByTestId(`favorite-btn-${slug}`),
     css: (page: Page, slug: string) =>

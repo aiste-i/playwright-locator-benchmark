@@ -76,9 +76,9 @@ export const TODO_STRATEGIES = {
   editInput: {
     getByRole: (item: Locator) => item.getByRole('textbox'),
     getByTestId: (item: Locator) => item.getByTestId('text-input'),
-    css: (item: Locator) => item.locator('input.new-todo'),
+    css: (item: Locator) => item.locator('input[type="text"]'),
     xpath: (item: Locator) =>
-      item.locator('xpath=./div[@class="view"]/div[@class="input-container"]/input[@class="new-todo"]'),
+      item.locator('xpath=.//input[@type="text"]'),
   },
 } as const;
 
