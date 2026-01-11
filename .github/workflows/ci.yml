@@ -103,7 +103,6 @@ jobs:
 
       - name: Run analysis scripts
         run: |
-          npm run analyze
           npm run analyze:enhanced
         continue-on-error: true
 

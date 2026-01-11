@@ -32,7 +32,6 @@ The goal is to determine which locator strategy is most resilient to UI changes,
 │
 ├── scripts/                      # Utility scripts
 │   ├── run-scenarios.sh          # Run all test scenarios
-│   ├── analyze.js                 # Basic analysis of test results
 │   └── analyze-enhanced.js       # Analysis with statistics
 │
 ├── cfg/                          # Configuration
@@ -112,9 +111,6 @@ npm run scenarios:skip-baseline -- --projects "getByRole locators,css locators"
 ### 4. Analyze Results
 
 ```bash
-# Basic analysis
-npm run analyze
-
 # Analysis with statistics
 npm run analyze:enhanced
 ```

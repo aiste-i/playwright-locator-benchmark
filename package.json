@@ -7,7 +7,6 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "test": "npx playwright test",
-    "analyze": "node scripts/analyze.js",
     "analyze:enhanced": "node scripts/analyze-enhanced.js",
     "scenarios": "bash scripts/run-scenarios.sh",
     "scenarios:skip-baseline": "bash scripts/run-scenarios.sh --skip-baseline"
