@@ -74,7 +74,10 @@ test.describe('RealWorld — locator benchmark', () => {
     await expect(oracleArticlePage(page)).toBeVisible();
   });
 
-  test('Favorite requires auth: clicking favorite redirects to /login', async ({ page, strategyName }) => {
+  test('Favorite requires auth: clicking favorite redirects to /login', async ({
+    page,
+    strategyName,
+  }) => {
     const L = getRealWorldLocators(strategyName);
 
     await L.favoriteButtonBySlug(page, SLUG).click();
@@ -82,33 +85,33 @@ test.describe('RealWorld — locator benchmark', () => {
     await expect(page).toHaveURL(/\/login$|\/register$/);
   });
 
-test('Navigation and article interaction chain', async ({ page, strategyName }) => {
-  const L = getRealWorldLocators(strategyName);
-  const baseUrl = process.env.REALWORLD_URL || 'http://localhost:4200/';
+  test('Navigation and article interaction chain', async ({ page, strategyName }) => {
+    const L = getRealWorldLocators(strategyName);
+    const baseUrl = process.env.REALWORLD_URL || 'http://localhost:4200/';
 
-  await L.navSignIn(page).click();
+    await L.navSignIn(page).click();
 
-  await expect(page).toHaveURL(/\/login$/);
+    await expect(page).toHaveURL(/\/login$/);
 
-  await L.headerBrand(page).click();
+    await L.headerBrand(page).click();
 
-  await expect(page).toHaveURL(/\/$/);
-  await expect(oracleFeedRegion(page)).toBeVisible();
+    await expect(page).toHaveURL(/\/$/);
+    await expect(oracleFeedRegion(page)).toBeVisible();
 
-  await L.previewLinkBySlug(page, SLUG).click();
+    await L.previewLinkBySlug(page, SLUG).click();
 
-  await expect(page).toHaveURL(new RegExp(`/article/${SLUG}$`));
-  await expect(oracleArticlePage(page)).toBeVisible();
+    await expect(page).toHaveURL(new RegExp(`/article/${SLUG}$`));
+    await expect(oracleArticlePage(page)).toBeVisible();
 
-  await page.goto(baseUrl, { waitUntil: 'networkidle' });
+    await page.goto(baseUrl, { waitUntil: 'networkidle' });
 
-  await L.favoriteButtonBySlug(page, SLUG).click();
+    await L.favoriteButtonBySlug(page, SLUG).click();
 
-  await expect(page).toHaveURL(/\/login$|\/register$/);
-});
+    await expect(page).toHaveURL(/\/login$|\/register$/);
+  });
 
   test('Sidebar tag chip filters feed', async ({ page, strategyName }) => {
-    if( strategyName === 'getByRole' ) {
+    if (strategyName === 'getByRole') {
       test.skip();
     }
 

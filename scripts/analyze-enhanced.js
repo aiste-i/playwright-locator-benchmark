@@ -35,10 +35,10 @@ async function main() {
   });
 
   // --- Baseline flakiness
-  const baseline = runs.filter((r) => r.phase === 'baseline' && !isInfra(r));
+  const baseline = runs.filter((r) => r.phase === 'baseline' && !isInfra(r) && !isExcluded(r));
   writeCsv(path.join(SUMMARY_DIR, 'baseline_flakiness_by_strategy.csv'), rateByStrategy(baseline));
 
-  const mutated = runs.filter((r) => r.phase === 'mutated' && !isInfra(r));
+  const mutated = runs.filter((r) => r.phase === 'mutated' && !isInfra(r) && !isExcluded(r));
 
   // Overall failure rate by strategy
   writeCsv(path.join(SUMMARY_DIR, 'overall_failure_rate.csv'), rateByStrategy(mutated));
@@ -131,10 +131,15 @@ function copyToSummary(filePath) {
 function isInfra(r) {
   return r.failureType === 'INFRA';
 }
-function isFailure(r) {
-  // treat TIMEOUT as a failure; exclude INFRA elsewhere
-  return r.status !== 'passed';
+
+function isExcluded(r) {
+  return r.status === 'skipped' || r.status === 'interrupted';
 }
+
+function isFailure(r) {
+  return r.status !== 'passed' && r.status !== 'skipped' && r.status !== 'interrupted';
+}
+
 function normalizeCategory(c) {
   if (!c) return null;
   const s = String(c).toLowerCase();
